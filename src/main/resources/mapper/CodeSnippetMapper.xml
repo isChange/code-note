@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ly.app.mapper.CodeSnippetMapper">
+
+    <resultMap id="BaseResultMap" type="com.ly.app.domain.entity.CodeSnippet">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="userId" column="userId" jdbcType="BIGINT"/>
+            <result property="title" column="title" jdbcType="VARCHAR"/>
+            <result property="code" column="code" jdbcType="VARCHAR"/>
+            <result property="language" column="language" jdbcType="VARCHAR"/>
+            <result property="theme" column="theme" jdbcType="VARCHAR"/>
+            <result property="description" column="description" jdbcType="VARCHAR"/>
+            <result property="descriptionMarkdown" column="descriptionMarkdown" jdbcType="VARCHAR"/>
+            <result property="expiryDate" column="expiryDate" jdbcType="TIMESTAMP"/>
+            <result property="isPublic" column="isPublic" jdbcType="TINYINT"/>
+            <result property="viewCount" column="viewCount" jdbcType="INTEGER"/>
+            <result property="likeCount" column="likeCount" jdbcType="INTEGER"/>
+            <result property="favoriteCount" column="favoriteCount" jdbcType="INTEGER"/>
+            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,userId,title,
+        code,language,theme,
+        description,descriptionMarkdown,expiryDate,
+        isPublic,viewCount,likeCount,
+        favoriteCount,createTime,updateTime,
+        isDelete
+    </sql>
+</mapper>
