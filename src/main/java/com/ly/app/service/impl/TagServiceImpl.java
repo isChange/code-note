@@ -10,14 +10,19 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ly.app.common.annotation.ApiLog;
 import com.ly.app.common.cache.RedisCache;
 import com.ly.app.common.constant.RedisConstant;
+import com.ly.app.common.enums.error.AssertEnum;
 import com.ly.app.common.enums.error.ErrorCode;
 import com.ly.app.common.units.AssertUtil;
 import com.ly.app.domain.dto.tag.TagCreateRequest;
 import com.ly.app.domain.dto.tag.TagQueryRequest;
 import com.ly.app.domain.dto.tag.TagUpdateRequest;
+import com.ly.app.domain.entity.CodeSnippet;
+import com.ly.app.domain.entity.Favorite;
 import com.ly.app.domain.entity.SnippetTag;
 import com.ly.app.domain.entity.Tag;
 import com.ly.app.domain.vo.tag.TagVO;
+import com.ly.app.mapper.CodeSnippetMapper;
+import com.ly.app.mapper.FavoriteMapper;
 import com.ly.app.mapper.SnippetTagMapper;
 import com.ly.app.mapper.TagMapper;
 import com.ly.app.service.TagService;
@@ -25,10 +30,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +43,12 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag>
 
     @Resource
     private SnippetTagMapper snippetTagMapper;
+
+    @Resource
+    private FavoriteMapper favoriteMapper;
+
+    @Resource
+    private CodeSnippetMapper codeSnippetMapper;
 
     @Override
     public Long createTag(TagCreateRequest createRequest) {
@@ -257,6 +265,33 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag>
         }
 
         return result;
+    }
+
+    @Override
+    public List<TagVO> listTagsByUserId(Long userId, boolean isFavorite) {
+        AssertUtil.isNotNull(userId, AssertEnum.PARAMS_EMPTY);
+        // 获取用户的代码片段
+        List<Long> shipIdList;
+        if (isFavorite){
+            LambdaQueryWrapper<Favorite> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Favorite::getUserId, userId).select(Favorite::getSnippetId);
+            shipIdList = favoriteMapper.selectList(queryWrapper).stream().map(Favorite::getSnippetId).collect(Collectors.toList());
+        }else {
+            LambdaQueryWrapper<CodeSnippet> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(CodeSnippet::getUserId,userId).select(CodeSnippet::getId);
+            shipIdList = codeSnippetMapper.selectList(queryWrapper).stream().map(CodeSnippet::getId).collect(Collectors.toList());
+        }
+        // 根据代码片段Id获取对应的标签
+        LambdaQueryWrapper<SnippetTag> snippetTagQuery = new LambdaQueryWrapper<>();
+        snippetTagQuery.in(SnippetTag::getSnippetId, shipIdList);
+        List<SnippetTag> snippetTags = snippetTagMapper.selectList(snippetTagQuery);
+
+        //收集标签信息统计
+        Map<Long, Integer> countMap = new HashMap<>();
+        snippetTags.forEach( item -> countMap.put(item.getTagId(), countMap.getOrDefault(item.getTagId(), 0) + 1));
+        List<TagVO> tagVOS = listAllTags();
+        tagVOS.forEach(item -> item.setUseCount(countMap.getOrDefault(item.getId(), 0)));
+        return tagVOS;
     }
 
     /**

@@ -9,6 +9,7 @@ import com.ly.app.domain.dto.tag.TagUpdateRequest;
 import com.ly.app.domain.vo.tag.TagVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author admin
@@ -69,5 +70,14 @@ public interface TagService extends IService<Tag> {
      * @param snippetIds 代码片段ID列表
      * @return 标签列表Map（key为snippetId，value为标签列表）
      */
-    java.util.Map<Long, List<TagVO>> listTagsBySnippetIds(List<Long> snippetIds);
+    Map<Long, List<TagVO>> listTagsBySnippetIds(List<Long> snippetIds);
+
+    /**
+     * 根据用户Id汇总标签情况
+     * @param userId 用户id
+     * @param isFavorite 是否收藏
+     * @return
+     */
+    List<TagVO> listTagsByUserId(Long userId, boolean isFavorite);
+
 }

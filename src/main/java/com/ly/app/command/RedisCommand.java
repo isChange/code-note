@@ -25,6 +25,8 @@ public class RedisCommand implements CommandLineRunner {
     TagService tagService;
     @Override
     public void run(String... args) throws Exception {
+        //删除原缓存
+        RedisCache.removeObject(RedisConstant.ALL_TAG);
         List<Tag> list = tagService.list();
         RedisCache.setList(RedisConstant.ALL_TAG, list);
     }
